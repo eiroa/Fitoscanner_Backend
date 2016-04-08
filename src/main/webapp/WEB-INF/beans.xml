@@ -1,0 +1,58 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:cxf="http://cxf.apache.org/core"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+    <import resource="classpath:spring-persistence-context.xml" />
+	
+
+	
+
+	
+	
+	<context:component-scan base-package="ar.edu"/>
+
+	<jaxrs:server id="restContainer" address="/"> 
+		<jaxrs:serviceBeans>
+			<ref bean="usuarioRest" />
+			<ref bean="muestraRest" />
+			<ref bean="imagenRest" />
+			<ref bean="especieRest" />
+			<ref bean="tratamientoRest" />
+		</jaxrs:serviceBeans>
+		<jaxrs:extensionMappings>
+			<entry key="json" value="application/json" />
+			<entry key="xml" value="application/xml" />
+		</jaxrs:extensionMappings>
+		<jaxrs:providers>
+		    <bean id='jacksonProvider' class='org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider' />
+			<bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider" />
+		</jaxrs:providers>
+		<jaxrs:features>
+			<cxf:logging />
+		</jaxrs:features>
+	</jaxrs:server>
+	
+	 <cxf:bus>
+        <cxf:properties>
+            <entry key="org.apache.cxf.stax.maxAttributeSize" value="640000"/>
+            <entry key="org.apache.cxf.stax.maxChildElements" value="50000"/>
+            <entry key="org.apache.cxf.stax.maxElementDepth" value="1000"/>
+            <entry key="org.apache.cxf.stax.maxAttributeCount" value="500"/> 
+            <entry key="org.apache.cxf.stax.maxAttributeSize" value="64000"/>
+            <entry key="org.apache.cxf.stax.maxTextLength" value="12000000"/>
+            <entry key="org.apache.cxf.stax.maxElementCount" value="9000000000000000000"/>
+      </cxf:properties>
+  </cxf:bus>
+	
+
+</beans>

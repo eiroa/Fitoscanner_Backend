@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop  
+       http://www.springframework.org/schema/aop/spring-aop.xsd"
+       >
+
+	<aop:aspectj-autoproxy />
+	
+    
+	
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+	<!-- Configurer that replaces ${...} placeholders with values from properties 
+		files -->
+	<!-- (in this case, mail and JDBC related properties) -->
+	<bean id="persistence.propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath*:META-INF/hibernate.properties</value>
+				<value>classpath*:META-INF/jdbc.properties</value>
+				<value>classpath*:META-INF/jdbc.MYSQL.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="persistence.dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost/tip_eiroa_mauro_server_backend_test" />
+		<property name="username" value="root" />
+		<property name="password" value="" />
+		<property name="defaultAutoCommit" value="false" />
+		<property name="poolPreparedStatements" value="true" />
+	</bean>
+	
+
+	<!-- Defines a global session factory that will be used by all modules. -->
+	<bean id="persistence.sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+
+		<property name="dataSource" ref="persistence.dataSource" />
+
+			<property name="packagesToScan" value="ar.edu.unq.tip_eiroa_mauro.server.model" />
+
+			<property name="hibernateProperties">
+				<props>
+					<!-- Configuration generic properties. They are loaded from file hibernate.properties -->
+					<prop key="hibernate.show_sql">false</prop>
+					<prop key="hibernate.id.new_generator_mappings">false</prop>
+					<prop key="hibernate.cglib.use_reflection_optimizer">true</prop>
+					<prop key="hibernate.connection.autocommit">true</prop>
+				</props>
+			</property>
+
+	</bean>
+
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+
+
+	<!-- ASPECTS -->
+	<bean id="Authenticator" class="ar.edu.unq.tip_eiroa_mauro.server.security.Authenticator" >
+	    <property name="usuarioService" ref="usuarioService"/>
+	 </bean>   
+	<!-- ________________________________________ -->
+	<!-- ________________________________________ -->
+	<!-- ___________ Beans de negocio___________ -->
+	<!-- ________________________________________ -->
+	<!-- ________________________________________ -->
+
+	<!-- MUESTRA -->
+	<bean id="muestraDao" class="ar.edu.unq.tip_eiroa_mauro.server.persistence.MuestraDao">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+	<bean id="muestraService" class="ar.edu.unq.tip_eiroa_mauro.server.services.MuestraService">
+		<property name="muestraDao" ref="muestraDao" />
+		<property name="imagenDao" ref="imagenDao" />
+		<property name="usuarioDao" ref="usuarioDao" />
+		<property name="especieDao" ref="especieDao" />
+	</bean>
+	<bean id="muestraRest" class="ar.edu.unq.tip_eiroa_mauro.server.rest.MuestraRest" >
+		<property name="muestraService" ref="muestraService"/>
+	</bean>
+	
+	<!--  IMAGEN -->
+	<bean id="imagenDao" class="ar.edu.unq.tip_eiroa_mauro.server.persistence.ImagenDao">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+	<bean id="imagenService" class="ar.edu.unq.tip_eiroa_mauro.server.services.ImagenService">
+		<property name="imagenDao" ref="imagenDao" />
+	</bean>
+	<bean id="imagenRest" class="ar.edu.unq.tip_eiroa_mauro.server.rest.ImagenRest" >
+		<property name="imagenService" ref="imagenService"/>
+	</bean>
+	
+	<!-- USUARIO -->
+	<bean id="usuarioDao" class="ar.edu.unq.tip_eiroa_mauro.server.persistence.UsuarioDao">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+	<bean id="usuarioService" class="ar.edu.unq.tip_eiroa_mauro.server.services.UsuarioService">
+		<property name="usuarioDao" ref="usuarioDao" />
+	</bean>
+	<bean id="usuarioRest" class="ar.edu.unq.tip_eiroa_mauro.server.rest.UsuarioRest" >
+		<property name="usuarioService" ref="usuarioService"/>
+	</bean>
+    
+	<!-- ESPECIE -->
+	<bean id="especieDao" class="ar.edu.unq.tip_eiroa_mauro.server.persistence.EspecieDao">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+	<bean id="especieService" class="ar.edu.unq.tip_eiroa_mauro.server.services.EspecieService">
+		<property name="especieDao" ref="especieDao" />
+		<property name="imagenDao" ref="imagenDao" />
+	</bean>
+	<bean id="especieRest" class="ar.edu.unq.tip_eiroa_mauro.server.rest.EspecieRest" >
+		<property name="especieService" ref="especieService"/>
+	</bean>
+	
+	<!-- TRATAMIENTO -->
+	<bean id="tratamientoDao" class="ar.edu.unq.tip_eiroa_mauro.server.persistence.TratamientoDao">
+		<property name="sessionFactory" ref="persistence.sessionFactory" />
+	</bean>
+	<bean id="tratamientoService" class="ar.edu.unq.tip_eiroa_mauro.server.services.TratamientoService">
+		<property name="tratamientoDao" ref="tratamientoDao" />
+		<property name="especieDao" ref="especieDao" />
+	</bean>
+	<bean id="tratamientoRest" class="ar.edu.unq.tip_eiroa_mauro.server.rest.TratamientoRest" >
+		<property name="tratamientoService" ref="tratamientoService"/>
+	</bean>
+    
+</beans>
